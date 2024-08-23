@@ -1,28 +1,14 @@
 package catalogo.biblioteca;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import java.time.LocalDate;
+import java.util.List;
 
 public class App {
 
     public static void main(String[] args) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("bibliotecaPU");
-        EntityManager em = emf.createEntityManager();
+        Archivio archivio = new Archivio();
 
-        em.getTransaction().begin();
-
-        // Creazione di un utente
-        Utente utente = new Utente();
-        utente.setNome("Mario");
-        utente.setCognome("Rossi");
-        utente.setDataNascita(LocalDate.of(1985, 5, 15));
-        utente.setNumeroTessera("12345");
-
-        em.persist(utente);
-
-        // Creazione di un libro
+        // Aggiunta di un libro al catalogo
         Libro libro = new Libro();
         libro.setCodiceIsbn("978-3-16-148410-0");
         libro.setTitolo("Il Signore degli Anelli");
@@ -30,23 +16,53 @@ public class App {
         libro.setNumeroPagine(1216);
         libro.setAutore("J.R.R. Tolkien");
         libro.setGenere("Fantasy");
+        archivio.aggiungiElemento(libro);
 
-        em.persist(libro);
+        // Aggiunta di una rivista al catalogo
+        Rivista rivista = new Rivista();
+        rivista.setCodiceIsbn("978-1-23-456789-0");
+        rivista.setTitolo("National Geographic");
+        rivista.setAnnoPubblicazione(2024);
+        rivista.setNumeroPagine(100);
+        rivista.setPeriodicita(Rivista.Periodicita.MENSILE);
+        archivio.aggiungiElemento(rivista);
+
+        // Creazione di un utente
+        Utente utente = new Utente();
+        utente.setNome("Aldo");
+        utente.setCognome("Baglio");
+        utente.setDataNascita(LocalDate.of(1985, 5, 15));
+        utente.setNumeroTessera("123456");
+        archivio.aggiungiUtente(utente);
 
         // Creazione di un prestito
         Prestito prestito = new Prestito(utente, libro, LocalDate.now());
-        em.persist(prestito);
+        archivio.aggiungiPrestito(prestito);
 
-        em.getTransaction().commit();
+        // Ricerca per ISBN
+        ElementoCatalogo elemento = archivio.ricercaPerIsbn("978-3-16-148410-0");
+        System.out.println("Elemento trovato per ISBN: " + elemento.getTitolo());
 
-        // Recupero e stampa dei dettagli del prestito
-        Prestito prestitoPersistito = em.find(Prestito.class, prestito.getId());
-        System.out.println("Prestito registrato: " + prestitoPersistito.getElementoPrestato().getTitolo() +
-                ", Utente: " + prestitoPersistito.getUtente().getNome() + " " +
-                prestitoPersistito.getUtente().getCognome() +
-                ", Data restituzione prevista: " + prestitoPersistito.getDataRestituzionePrevista());
+        // Ricerca per anno di pubblicazione
+        List<ElementoCatalogo> elementiAnno = archivio.ricercaPerAnno(1954);
+        System.out.println("Elementi trovati per anno 1954: " + elementiAnno.size());
 
-        em.close();
-        emf.close();
+        // Ricerca per autore
+        List<Libro> libriAutore = archivio.ricercaPerAutore("J.R.R. Tolkien");
+        System.out.println("Libri trovati per autore J.R.R. Tolkien: " + libriAutore.size());
+
+        // Ricerca per titolo o parte di esso
+        List<ElementoCatalogo> elementiTitolo = archivio.ricercaPerTitolo("Signore");
+        System.out.println("Elementi trovati per titolo contenente 'Signore': " + elementiTitolo.size());
+
+        // Ricerca degli elementi attualmente in prestito per numero tessera
+        List<Prestito> prestitiUtente = archivio.ricercaPrestitiPerNumeroTessera("12345");
+        System.out.println("Prestiti attivi per utente con tessera 12345: " + prestitiUtente.size());
+
+        // Ricerca di tutti i prestiti scaduti e non ancora restituiti
+        List<Prestito> prestitiScaduti = archivio.ricercaPrestitiScadutiNonRestituiti();
+        System.out.println("Prestiti scaduti e non ancora restituiti: " + prestitiScaduti.size());
+
+        archivio.close();
     }
 }
