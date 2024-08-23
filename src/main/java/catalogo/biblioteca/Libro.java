@@ -9,7 +9,6 @@ public class Libro extends ElementoCatalogo {
 
     private String genere;
 
-    // Getters e Setters
     public String getAutore() {
         return autore;
     }

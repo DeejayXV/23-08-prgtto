@@ -16,7 +16,6 @@ public abstract class ElementoCatalogo {
 
     private int numeroPagine;
 
-    // Getters e Setters
     public String getCodiceIsbn() {
         return codiceIsbn;
     }

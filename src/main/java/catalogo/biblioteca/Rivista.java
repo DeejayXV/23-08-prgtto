@@ -5,14 +5,19 @@ import javax.persistence.Entity;
 @Entity
 public class Rivista extends ElementoCatalogo {
 
-    private String periodicita;
+    public enum Periodicita {
+        SETTIMANALE,
+        MENSILE,
+        SEMESTRALE
+    }
 
-    // Getters e Setters
-    public String getPeriodicita() {
+    private Periodicita periodicita;
+
+    public Periodicita getPeriodicita() {
         return periodicita;
     }
 
-    public void setPeriodicita(String periodicita) {
+    public void setPeriodicita(Periodicita periodicita) {
         this.periodicita = periodicita;
     }
 }
